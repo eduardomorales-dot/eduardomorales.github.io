@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Página imagen animada</title>
+  <style>
+    body {
+      text-align: center;
+      background-color: #000;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Contenedor general */
+    .contenedor {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    /* Lados con imágenes */
+    .lado {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .lado img {
+      width: 120px;
+      height: auto;
+      border-radius: 10px;
+      border: 2px solid white;
+    }
+
+    canvas {
+      border: 3px solid #5e5e5e;
+      background-color: black;
+    }
+  </style>
+  <script>
+    var x = Math.random() * 650;
+    var y = Math.random() * 450;
+    var dx = 2;
+    var dy = 2;
+    var imagen = new Image();
+    imagen.src = "neko.jpg";
+
+    function animate() {
+      requestAnimationFrame(animate);
+      var canvas = document.getElementById("micanvas");
+      var context = canvas.getContext("2d");
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(imagen, x, y, 150, 150);
+
+      // Rebote horizontal
+      if (x + 150 > canvas.width || x < 0) {
+        dx = -dx;
+      }
+      // Rebote vertical
+      if (y + 150 > canvas.height || y < 0) {
+        dy = -dy;
+      }
+
+      x += dx;
+      y += dy;
+    }
+    window.onload = animate;
+  </script>
+</head>
+<body>
+  <h2 style="color:white;">Animación con imágenes alrededor</h2>
+  <div class="contenedor">
+    <!-- Imágenes a la izquierda -->
+    <div class="lado">
+      <img src="dogo.jpg" alt="dogo">
+      <img src="dvd.jpg" alt="dvd">
+    </div>
+
+    <!-- Canvas en el centro -->
+    <canvas id="micanvas" width="800" height="600"></canvas>
+
+    <!-- Imágenes a la derecha -->
+    <div class="lado">
+      <img src="rayo.jpg" alt="rayo">
+      <img src="Surprise.jpg" alt="surprise">
+    </div>
+  </div>
+</body>
+</html>
+
