@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dragon Selector</title>
+  <style>
+    body {
+      background: linear-gradient(to bottom, #0a0a23, #1c1c3c);
+      color: #fff;
+      font-family: 'Trebuchet MS', sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #2e2e5c;
+      padding: 20px;
+      font-size: 2rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      border-bottom: 3px solid #ff9800;
+      text-shadow: 2px 2px 5px black;
+    }
+
+    #dragon-container {
+      margin-top: 40px;
+    }
+
+    #dragon-img {
+      width: 300px;
+      height: auto;
+      border: 5px solid #ff9800;
+      border-radius: 15px;
+      box-shadow: 0 0 25px #ff5722;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    #dragon-img:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 40px #ffcc00;
+    }
+
+    #dragon-text {
+      margin-top: 20px;
+      font-size: 1.5rem;
+      color: #ffcc00;
+      text-shadow: 2px 2px 5px black;
+    }
+
+    footer {
+      margin-top: 50px;
+      padding: 10px;
+      background: #222244;
+      font-size: 1rem;
+      color: #bbb;
+    }
+  </style>
+</head>
+<body>
+  <header>🐉 Dragon Selector 🐉</header>
+
+  <div id="dragon-container">
+    <img id="dragon-img" src="imagen/blue.jpeg" alt="Dragon">
+    <div id="dragon-text">Este es el dragón azul, maestro del hielo.</div>
+  </div>
+
+  <footer>
+    Presiona las teclas <b>1 - 5</b> para cambiar de dragón.
+  </footer>
+
+  <script>
+    const dragonImg = document.getElementById("dragon-img");
+    const dragonText = document.getElementById("dragon-text");
+
+    const dragons = {
+      "1": { img: "imagen/blue.jpeg", text: "Este es el dragón azul, maestro del hielo." },
+      "2": { img: "imagen/green.jpeg", text: "El dragón verde, guardián de los bosques." },
+      "3": { img: "imagen/OIP.jpeg", text: "El dragón esmeralda, portador del fuego ancestral." },
+      "4": { img: "imagen/red.jpeg", text: "El dragón rojo, señor de las llamas." },
+      "5": { img: "imagen/blue.jpeg", text: "El dragón legendario que domina los cielos." }
+    };
+
+    document.addEventListener("keydown", (event) => {
+      if (dragons[event.key]) {
+        dragonImg.src = dragons[event.key].img;
+        dragonText.textContent = dragons[event.key].text;
+      }
+    });
+  </script>
+</body>
+</html>
