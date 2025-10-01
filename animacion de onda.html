@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Nave en Onda Senoidal</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden; /* quita scrollbars */
+      background: #000;
+    }
+    canvas {
+      display: block; /* quita espacio extra */
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    // Ajustar canvas al tamaño de la ventana
+    function ajustarCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", ajustarCanvas);
+    ajustarCanvas();
+
+    // === Cargar imágenes ===
+    const fondo = new Image();
+    fondo.src = "Space.jpg";   // Fondo de estrellas
+
+    const nave = new Image();
+    nave.src = "Spaceship.png"; // Nave
+
+    let tiempo = 0;
+
+    function animar() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Dibujar fondo cubriendo todo el canvas
+      ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+
+      // Movimiento de la nave con onda senoidal
+      const x = 100 + tiempo * 2; 
+      const y = canvas.height / 2 + Math.sin(tiempo * 0.05) * 120;
+      const escala = 0.8 + Math.sin(tiempo * 0.1) * 0.2;
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(escala, escala);
+      ctx.drawImage(nave, -50, -50, 100, 100); 
+      ctx.restore();
+
+      // Reiniciar cuando salga del canvas
+      if (x > canvas.width + 100) {
+        tiempo = 0;
+      }
+
+      tiempo++;
+      requestAnimationFrame(animar);
+    }
+
+    // Iniciar animación cuando carguen imágenes
+    fondo.onload = () => {
+      nave.onload = () => {
+        animar();
+      };
+    };
+  </script>
+</body>
+</html>
