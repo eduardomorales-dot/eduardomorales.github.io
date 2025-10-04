@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Animación Star — Movimiento Senoidal</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #000;
+  }
+  canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+  }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+
+<script>
+// ======== CONFIGURACIÓN BÁSICA ========
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+let W = canvas.width = window.innerWidth;
+let H = canvas.height = window.innerHeight;
+
+window.addEventListener("resize", () => {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+});
+
+// ======== CARGAR IMÁGENES ========
+// Fondo
+const fondo = new Image();
+fondo.src = "background mario.jpg";   // Imagen de fondo
+
+// Objeto
+const objeto = new Image();
+objeto.src = "star.png";              // Imagen del objeto (estrella)
+
+// ======== PARÁMETROS DE ANIMACIÓN ========
+let tiempo = 0;
+const velocidad = 0.02;   // Velocidad de desplazamiento
+const amplitud = 100;     // Altura del movimiento seno
+const frecuencia = 0.02;  // Frecuencia de la onda
+
+// ======== FUNCIÓN DE DIBUJO ========
+function dibujar() {
+  // Dibuja fondo
+  if (fondo.complete) {
+    ctx.drawImage(fondo, 0, 0, W, H);
+  } else {
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // Movimiento senoidal
+  const x = (tiempo * 200) % (W + 200) - 100;
+  const y = H / 2 + Math.sin(tiempo * 2) * amplitud;
+
+  // Dibuja el objeto (estrella)
+  if (objeto.complete) {
+    const w = objeto.width;
+    const h = objeto.height;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.drawImage(objeto, -w / 2, -h / 2, w, h);
+    ctx.restore();
+  }
+
+  tiempo += velocidad;
+  requestAnimationFrame(dibujar);
+}
+
+// ======== INICIO ========
+dibujar();
+</script>
+</body>
+</html>
