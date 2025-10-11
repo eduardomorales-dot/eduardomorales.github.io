@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dibujos en todo el Canvas</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #1e1e2e;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <script>
+    const c = document.getElementById("canvas");
+    const ctx = c.getContext("2d");
+
+    // Ajustar al tamaño completo de la pantalla
+    function resizeCanvas() {
+      c.width = window.innerWidth;
+      c.height = window.innerHeight;
+      drawScene();
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // ==== FUNCIÓN PRINCIPAL DE DIBUJO ====
+    function drawScene() {
+      const W = c.width;
+      const H = c.height;
+
+      // Fondo
+      ctx.fillStyle = "#202040";
+      ctx.fillRect(0, 0, W, H);
+
+      // Suelo
+      ctx.fillStyle = "#264653";
+      ctx.fillRect(0, H * 0.8, W, H * 0.2);
+
+      // ==== CASITA ====
+      const houseX = W * 0.15;
+      const houseY = H * 0.55;
+      ctx.fillStyle = "#e76f51"; // cuerpo
+      ctx.fillRect(houseX, houseY, 150, 130);
+
+      // techo
+      ctx.fillStyle = "#8d3b19";
+      ctx.beginPath();
+      ctx.moveTo(houseX - 20, houseY);
+      ctx.lineTo(houseX + 75, houseY - 80);
+      ctx.lineTo(houseX + 170, houseY);
+      ctx.closePath();
+      ctx.fill();
+
+      // puerta
+      ctx.fillStyle = "#f4a261";
+      ctx.fillRect(houseX + 60, houseY + 60, 35, 70);
+
+      // === HONGUITO ===
+      const mushX = W * 0.45;
+      const mushY = H * 0.6;
+      // tallo
+      ctx.fillStyle = "#f1dec9";
+      ctx.fillRect(mushX, mushY, 50, 100);
+      // gorrito
+      ctx.fillStyle = "#e63946";
+      ctx.beginPath();
+      ctx.arc(mushX + 25, mushY, 70, Math.PI, 0);
+      ctx.closePath();
+      ctx.fill();
+      // manchas
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(mushX, mushY - 20, 10, 0, Math.PI * 2);
+      ctx.arc(mushX + 25, mushY - 40, 13, 0, Math.PI * 2);
+      ctx.arc(mushX + 50, mushY - 15, 9, 0, Math.PI * 2);
+      ctx.fill();
+
+      // === ESTRELLA ===
+      function drawStar(cx, cy, spikes, outerR, innerR, color) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.translate(cx, cy);
+        ctx.moveTo(0, -outerR);
+        for (let i = 0; i < spikes; i++) {
+          ctx.rotate(Math.PI / spikes);
+          ctx.lineTo(0, -innerR);
+          ctx.rotate(Math.PI / spikes);
+          ctx.lineTo(0, -outerR);
+        }
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.restore();
+      }
+      drawStar(W * 0.75, H * 0.25, 5, 80, 35, "#ffdd00");
+
+      // === LUNA ===
+      const moonX = W * 0.9;
+      const moonY = H * 0.2;
+      ctx.beginPath();
+      ctx.arc(moonX, moonY, 60, 0, Math.PI * 2);
+      ctx.fillStyle = "#f6e05e";
+      ctx.fill();
+
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.beginPath();
+      ctx.arc(moonX + 20, moonY - 10, 60, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalCompositeOperation = "source-over";
+
+      // === FIGURA LIBRE (NUBE) ===
+      const cloudX = W * 0.3;
+      const cloudY = H * 0.25;
+      ctx.beginPath();
+      ctx.fillStyle = "#a2d2ff";
+      ctx.arc(cloudX, cloudY, 35, 0, Math.PI * 2);
+      ctx.arc(cloudX + 40, cloudY - 20, 45, 0, Math.PI * 2);
+      ctx.arc(cloudX + 80, cloudY, 35, 0, Math.PI * 2);
+      ctx.arc(cloudX + 40, cloudY + 15, 45, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Unas estrellitas pequeñas en el cielo
+      ctx.fillStyle = "#fff";
+      for (let i = 0; i < 50; i++) {
+        const x = Math.random() * W;
+        const y = Math.random() * H * 0.5;
+        ctx.beginPath();
+        ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  </script>
+</body>
+</html>
