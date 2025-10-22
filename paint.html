@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mini Paint — HTML</title>
+  <style>
+    :root{
+      --toolbar-height:72px;
+      --bg:#f4f4f7;
+      --panel:#ffffff;
+      --accent:#222;
+    }
+    *{box-sizing:border-box;font-family:Inter, system-ui, Arial, sans-serif}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--accent)}
+    .app{display:flex;flex-direction:column;height:100vh}
+    header{height:var(--toolbar-height);display:flex;align-items:center;gap:12px;padding:10px 14px;background:linear-gradient(180deg,#ffffffcc,#ffffff)}
+    .palette{display:flex;gap:8px;align-items:center}
+    .color{width:36px;height:36px;border-radius:6px;cursor:pointer;box-shadow:0 1px 0 rgba(0,0,0,0.08);border:2px solid transparent}
+    .color.selected{outline:3px solid rgba(0,0,0,0.08);transform:translateY(-2px)}
+    .controls{display:flex;align-items:center;gap:8px;margin-left:auto}
+    button{background:var(--panel);border:1px solid #e6e6ea;padding:8px 12px;border-radius:8px;cursor:pointer}
+    button.secondary{background:#fff0;border-radius:8px}
+    .size-btn{width:40px;height:40px;display:inline-grid;place-items:center}
+    #canvasWrap{flex:1;display:grid;align-items:stretch;position:relative;padding:12px}
+    canvas{width:100%;height:100%;background:#fff;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.06);display:block}
+    .label{font-size:13px;color:#666}
+    .toolgroup{display:flex;gap:8px;align-items:center}
+    .active{box-shadow:0 6px 14px rgba(0,0,0,0.08)}
+    footer{height:44px;display:flex;align-items:center;gap:12px;padding:8px 14px;color:#666}
+    @media (max-width:640px){header{padding:8px} .color{width:32px;height:32px}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div style="display:flex;flex-direction:column">
+        <strong>Mini Paint</strong>
+        <span class="label">Pinta con el mouse o con el dedo</span>
+      </div>
+
+      <div class="palette" aria-label="Paleta de colores">
+        <!-- 5+ colores -->
+        <div class="color selected" data-color="#000000" style="background:#000000"></div>
+        <div class="color" data-color="#FF3B30" style="background:#FF3B30"></div>
+        <div class="color" data-color="#FF9500" style="background:#FF9500"></div>
+        <div class="color" data-color="#FFCC00" style="background:#FFCC00"></div>
+        <div class="color" data-color="#34C759" style="background:#34C759"></div>
+        <div class="color" data-color="#0A84FF" style="background:#0A84FF"></div>
+        <div class="color" data-color="#AF52DE" style="background:#AF52DE"></div>
+      </div>
+
+      <div class="controls">
+        <div class="toolgroup">
+          <span class="label">Grosor</span>
+          <button class="size-btn" data-size="4">●</button>
+          <button class="size-btn active" data-size="8">●●</button>
+          <button class="size-btn" data-size="16">●●●</button>
+        </div>
+
+        <div class="toolgroup">
+          <button id="eraser">Borrador</button>
+          <button id="clear">Borrar todo</button>
+        </div>
+
+        <div class="toolgroup">
+          <button id="download">Descargar</button>
+        </div>
+      </div>
+    </header>
+
+    <div id="canvasWrap">
+      <canvas id="paintCanvas"></canvas>
+    </div>
+
+    <footer>
+      <span id="status">Color: #000000 · Tamaño: 8px</span>
+    </footer>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('paintCanvas');
+    const ctx = canvas.getContext('2d', { alpha: false });
+    const DPR = window.devicePixelRatio || 1;
+
+    function resizeCanvas(){
+      const wrap = canvas.parentElement.getBoundingClientRect();
+      canvas.width = Math.floor(wrap.width * DPR);
+      canvas.height = Math.floor(wrap.height * DPR);
+      canvas.style.width = wrap.width + 'px';
+      canvas.style.height = wrap.height + 'px';
+      ctx.scale(DPR, DPR);
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0,0,wrap.width,wrap.height);
+    }
+
+    // init
+    resizeCanvas();
+    window.addEventListener('resize', () => {
+      // preserve drawing by copying to temp canvas
+      const tmp = document.createElement('canvas');
+      tmp.width = canvas.width; tmp.height = canvas.height;
+      const tctx = tmp.getContext('2d');
+      tctx.drawImage(canvas, 0, 0);
+      resizeCanvas();
+      ctx.drawImage(tmp, 0, 0);
+    });
+
+    // tools state
+    let drawing = false;
+    let last = null;
+    let color = '#000000';
+    let size = 8;
+    let isEraser = false;
+
+    const status = document.getElementById('status');
+    function updateStatus(){ status.textContent = `Color: ${isEraser ? 'Borrador' : color} · Tamaño: ${size}px`; }
+
+    // palette
+    document.querySelectorAll('.color').forEach(el => {
+      el.addEventListener('click', ()=>{
+        document.querySelectorAll('.color').forEach(c=>c.classList.remove('selected'));
+        el.classList.add('selected');
+        color = el.dataset.color;
+        isEraser = false;
+        updateStatus();
+      });
+    });
+
+    // sizes
+    document.querySelectorAll('.size-btn').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        document.querySelectorAll('.size-btn').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        size = Number(b.dataset.size);
+        updateStatus();
+      });
+    });
+
+    // eraser
+    document.getElementById('eraser').addEventListener('click', ()=>{
+      isEraser = true;
+      document.querySelectorAll('.color').forEach(c=>c.classList.remove('selected'));
+      updateStatus();
+    });
+
+    // clear
+    document.getElementById('clear').addEventListener('click', ()=>{
+      const wrap = canvas.getBoundingClientRect();
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0,0,wrap.width,wrap.height);
+    });
+
+    // download
+    document.getElementById('download').addEventListener('click', ()=>{
+      const link = document.createElement('a');
+      link.download = 'mini-paint.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+
+    // drawing helpers
+    function getPos(e){
+      const r = canvas.getBoundingClientRect();
+      if(e.touches && e.touches[0]){
+        return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+      } else {
+        return { x: e.clientX - r.left, y: e.clientY - r.top };
+      }
+    }
+
+    function pointerDown(e){
+      e.preventDefault();
+      drawing = true;
+      last = getPos(e);
+    }
+    function pointerUp(e){ drawing = false; last = null; }
+
+    function pointerMove(e){
+      if(!drawing) return;
+      e.preventDefault();
+      const p = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(last.x, last.y);
+      ctx.lineTo(p.x, p.y);
+      ctx.strokeStyle = isEraser ? '#ffffff' : color;
+      ctx.lineWidth = size;
+      ctx.stroke();
+      last = p;
+    }
+
+    // mouse
+    canvas.addEventListener('mousedown', pointerDown);
+    window.addEventListener('mouseup', pointerUp);
+    window.addEventListener('mousemove', pointerMove);
+
+    // touch
+    canvas.addEventListener('touchstart', pointerDown, {passive:false});
+    window.addEventListener('touchend', pointerUp, {passive:false});
+    window.addEventListener('touchmove', pointerMove, {passive:false});
+
+    // prevent page scroll when drawing on mobile
+    ['touchstart','touchmove'].forEach(ev => {
+      document.body.addEventListener(ev, function(e){
+        if(e.target === canvas) e.preventDefault();
+      }, {passive:false});
+    });
+
+    updateStatus();
+  </script>
+</body>
+</html>
