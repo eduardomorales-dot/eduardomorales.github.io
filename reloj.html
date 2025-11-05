@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Reloj simple — 3 manecillas reales</title>
+  <style>
+    :root{--size:340px}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0f1724;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial;color:#fff}
+    .clock{width:var(--size);height:var(--size);background:radial-gradient(circle at 50% 35%, #f8fafc 0%, #e6eef9 35%, #dbe8ff 70%);border-radius:50%;position:relative;box-shadow:0 10px 30px rgba(2,6,23,0.6), inset 0 6px 18px rgba(255,255,255,0.55)}
+    .rim{position:absolute;inset:0;border-radius:50%;padding:12px}
+    .face{width:100%;height:100%;border-radius:50%;position:relative;display:grid;place-items:center}
+
+    /* marcadores horarios */
+    .mark{position:absolute;left:50%;top:12px;width:4px;height:14px;background:#0b1220;border-radius:2px;transform-origin:50% 150%}
+    .mark.small{height:8px;opacity:0.6}
+
+    /* manecillas */
+    .hand{position:absolute;left:50%;top:50%;transform-origin:50% 90%;transform:translateX(-50%) rotate(0deg);pointer-events:none}
+    .hand .bar{position:absolute;left:50%;top:10%;transform:translateX(-50%);border-radius:8px}
+
+    .hour .bar{width:10px;height:90px;background:#07203a}
+    .minute .bar{width:7px;height:125px;background:#0b395e}
+    .second .bar{width:3px;height:150px;background:#e11d48}
+
+    .center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;background:#061826;border-radius:50%;box-shadow:0 3px 8px rgba(2,6,23,0.6)}
+
+    /* subtle numbers */
+    .num{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:14px;color:rgba(4,8,15,0.6);pointer-events:none}
+
+    /* responsive */
+    @media (max-width:480px){:root{--size:260px}}
+  </style>
+</head>
+<body>
+  <div class="clock" aria-label="Reloj con tres manecillas">
+    <div class="rim">
+      <div class="face" id="face">
+        <!-- marcas (se generan por JS) -->
+        <div class="hand hour" id="hour"><div class="bar"></div></div>
+        <div class="hand minute" id="minute"><div class="bar"></div></div>
+        <div class="hand second" id="second"><div class="bar"></div></div>
+        <div class="center" aria-hidden="true"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Elementos
+    const face = document.getElementById('face')
+    const hourEl = document.getElementById('hour')
+    const minuteEl = document.getElementById('minute')
+    const secondEl = document.getElementById('second')
+
+    // Crear 60 marcas alrededor de la esfera
+    for (let i = 0; i < 60; i++) {
+      const m = document.createElement('div')
+      m.className = 'mark' + (i % 5 === 0 ? '' : ' small')
+      m.style.transform = `translateX(-50%) rotate(${i * 6}deg)`
+      face.appendChild(m)
+    }
+
+    // Función que calcula ángulos reales y aplica rotación
+    function updateHands() {
+      const now = new Date()
+      const ms = now.getMilliseconds()
+      const s = now.getSeconds() + ms / 1000
+      const m = now.getMinutes() + s / 60
+      const h = (now.getHours() % 12) + m / 60
+
+      // Ángulos exactos (grados)
+      const angleS = s * 6 // 360/60
+      const angleM = m * 6 // 360/60
+      const angleH = h * 30 // 360/12
+
+      // Aplicar transformaciones
+      secondEl.style.transform = `translateX(-50%) rotate(${angleS}deg)`
+      minuteEl.style.transform = `translateX(-50%) rotate(${angleM}deg)`
+      hourEl.style.transform = `translateX(-50%) rotate(${angleH}deg)`
+
+      // request next frame
+      requestAnimationFrame(updateHands)
+    }
+
+    // arrancar animación (manecillas con velocidades proporcionales a un reloj real)
+    requestAnimationFrame(updateHands)
+  </script>
+</body>
+</html>
